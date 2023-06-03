@@ -16,7 +16,7 @@ full_setup() {
 
     echof "Installing packages..."; sleep 1
     sudo pacman -S --noconfirm --needed \
-        lightdm $LIGHTDM_GREETER qtile dunst \
+        lightdm $LIGHTDM_GREETER qtile dunst dmenu \
         kitty firefox thunderbird discord obsidian libreoffice-fresh \
         neovim tmux fd ripgrep exa bat ufw syncthing feh zsh starship xclip fzf xdg-user-dirs \
         playerctl \
