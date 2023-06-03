@@ -75,7 +75,7 @@ full_setup() {
     mkdir -p bin obsidian pictures/{wallpapers,screenshots} projects &> /dev/null
 
     echof "Cloning dotfiles..."; sleep 1
-    cd dotfiles
+    cd .dotfiles
     for folder in *; do
         if [[ -e "$HOME/.config/$folder" ]]; then
         echo "    Creating backup of $folder"
