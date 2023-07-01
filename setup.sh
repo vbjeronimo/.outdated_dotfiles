@@ -1,11 +1,58 @@
 #!/bin/bash
 set -e
 
+DRIVE=/dev/nvme0n1
+
 WALLPAPER_URL=https://w.wallhaven.cc/full/9m/wallhaven-9mjoy1.png
 LIGHTDM_GREETER=lightdm-gtk-greeter
 
 echof() {
     echo -e "\n$(tput bold)$(tput setaf 7)--> [$(tput setaf 3)*$(tput setaf 7)] $1$(tput sgr0)"
+}
+
+install_arch() {
+    parted -s $DRIVE \
+        mklabel gpt \
+        mkpart ESP fat32 1MiB 501MiB \
+        mkpart root ext4 501MiB 30.5GiB \
+        mkpart swap linux-swap 30.5GiB 46.5GiB \
+        mkpart home ext4 46.5GiB 100% \
+        set 1 boot on
+
+    mkfs.fat -F 32 ${DRIVE}p1
+    mkfs.ext4 ${DRIVE}p2
+    mkswap ${DRIVE}p3
+    mkfs.ext4 ${DRIVE}p4
+
+    mount ${DRIVE}p2 /mnt
+    mount --mkdir ${DRIVE}p1 /mnt/efi
+    mount --mkdir ${DRIVE}p4 /mnt/home
+    swapon ${DRIVE}p3
+
+    echof "Installing base system..."; sleep 1
+    pacstrap -K /mnt base linux linux-firmware base-devel man-{db,pages} texinfo
+
+    echof "Generating fstab..."; sleep 1
+    genfstab -U /mnt >> /mnt/etc/fstab
+
+    echof "Copying script to new system..."; sleep 1
+    cp $0 /mnt/setup.sh
+
+    echof "Entering new system..."; sleep 1
+    arch-chroot /mnt /root/setup.sh initial_setup
+
+    if [[ $? -eq 0 ]]; then
+        echof "Installation complete!"
+        exit 0
+    else
+        echof "Something went wrong, exiting..."
+        exit 1
+    fi
+}
+
+initial_setup() {
+    echof "testing stuff..."; sleep 1
+    exit 1
 }
 
 full_setup() {
@@ -89,10 +136,14 @@ full_setup() {
     wget -O ~/pictures/wallpapers/active.png $WALLPAPER_URL
 }
 
-# if no arguments are passed, run the full setup
-# otherwise, run the function passed as argument
-if [ $# -eq 0 ]; then
-    full_setup
-else
-    $1
-fi
+case "$1" in
+    "")
+        install_arch
+        ;;
+    initial-setup)
+        initial_setup
+        ;;
+    *)
+        echo "Usage: $0 {full}"
+        exit 1
+esac
