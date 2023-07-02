@@ -23,7 +23,7 @@ install_arch() {
         mkpart root ext4 501MiB 30.5GiB \
         mkpart swap linux-swap 30.5GiB 46.5GiB \
         mkpart home ext4 46.5GiB 100% \
-        set 1 boot on
+        set 1 esp on
 
     mkfs.fat -F 32 ${DRIVE}p1
     mkfs.ext4 ${DRIVE}p2
@@ -80,6 +80,12 @@ initial_setup() {
 
     echof "Setting up bootloader..."
     bootctl install
+    cat <<EOF > /efi/loader/entries/arch.conf
+title Arch linux
+linux /vmlinuz-linux
+initrd /initramfs-linux.img
+options root=${DRIVE}p2 rw
+EOF
 
     echof "Installing microcode..."
     if [[ $(lscpu | grep -o GenuineIntel) == "GenuineIntel" ]]; then
