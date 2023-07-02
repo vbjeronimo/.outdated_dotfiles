@@ -2,6 +2,12 @@
 set -e
 
 DRIVE=/dev/nvme0n1
+TIMEZONE=UTC
+HOSTNAME=machine
+
+USERNAME=arch
+USER_PASSWORD=password
+ROOT_PASSWORD=password
 
 WALLPAPER_URL=https://w.wallhaven.cc/full/9m/wallhaven-9mjoy1.png
 LIGHTDM_GREETER=lightdm-gtk-greeter
@@ -29,39 +35,70 @@ install_arch() {
     mount --mkdir ${DRIVE}p4 /mnt/home
     swapon ${DRIVE}p3
 
-    echof "Installing base system..."; sleep 1
+    echof "Installing base system..."
     pacstrap -K /mnt base linux linux-firmware base-devel man-{db,pages} texinfo
 
-    echof "Generating fstab..."; sleep 1
+    echof "Generating fstab..."
     genfstab -U /mnt >> /mnt/etc/fstab
 
-    echof "Copying script to new system..."; sleep 1
+    echof "Copying script to new system..."
     cp $0 /mnt/setup.sh
 
-    echof "Entering new system..."; sleep 1
-    arch-chroot /mnt /root/setup.sh initial_setup
+    echof "Entering new system..."
+    arch-chroot /mnt ./setup.sh initial_setup
 
-    if [[ $? -eq 0 ]]; then
-        echof "Installation complete!"
-        exit 0
-    else
-        echof "Something went wrong, exiting..."
+    if [ -f /mnt/setup.sh ]; then
+        echof "ERROR: Something went wrong in arch-chroot. Exiting..."
         exit 1
+    else
+#        echof "Unmounting partitions..."
+#        umount -R /mnt
+#        swapoff -a
+        echof "Done! You can now reboot into your new system."
     fi
 }
 
 initial_setup() {
-    echof "testing stuff..."; sleep 1
-    exit 1
+    echof "Setting timezone..."
+    ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+    hwclock --systohc
+
+    echof "Setting locale..."
+    sed -i "s/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
+    locale-gen
+    echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+    echof "Setting hostname..."
+    echo $HOSTNAME > /etc/hostname
+
+    echof "Setting root password..."
+    echo "root:$ROOT_PASSWORD" | chpasswd
+
+    echof "Creating user..."
+    useradd -m -G wheel $USERNAME
+    echo "$USERNAME:$USER_PASSWORD" | chpasswd
+
+    echof "Setting up bootloader..."
+    bootctl install
+
+    echof "Installing microcode..."
+    if [[ $(lscpu | grep -o GenuineIntel) == "GenuineIntel" ]]; then
+        pacman -S --noconfirm intel-ucode
+    elif [[ $(lscpu | grep -o AuthenticAMD) == "AuthenticAMD" ]]; then
+        pacman -S --noconfirm amd-ucode
+    fi
+
+
+    rm /setup.sh
 }
 
 full_setup() {
     cd ~
 
-    echof "Updating the system..."; sleep 1
+    echof "Updating the system..."
     sudo pacman -Syu --noconfirm
 
-    echof "Installing packages..."; sleep 1
+    echof "Installing packages..."
     sudo pacman -S --noconfirm --needed \
         lightdm $LIGHTDM_GREETER qtile dunst dmenu \
         kitty firefox thunderbird discord obsidian libreoffice-fresh \
@@ -76,14 +113,14 @@ full_setup() {
     sudo sed -i "s/#greeter-session=example-gtk-gnome/greeter-session=$LIGHTDM_GREETER/" /etc/lightdm/lightdm.conf
 
     if ! systemctl is-enabled docker &> /dev/null; then
-        echof "Setting up docker..."; sleep 1
+        echof "Setting up docker..."
         sudo systemctl enable docker.service
         sudo systemctl enable containerd.service
         sudo usermod -aG docker $USER
     fi
 
     if ! systemctl is-enabled ufw &> /dev/null; then
-        echof "Setting up firewall..."; sleep 1
+        echof "Setting up firewall..."
         sudo systemctl enable ufw.service
         sudo ufw default deny incoming
         sudo ufw default allow outgoing
@@ -91,7 +128,7 @@ full_setup() {
         sudo ufw enable
     fi
 
-    echof "Enabling services..."; sleep 1
+    echof "Enabling services..."
     ROOT_SERVICES=("lightdm" "NetworkManager")
     for service in ${ROOT_SERVICES[@]}; do
         if ! systemctl is-enabled $service &> /dev/null; then
@@ -107,21 +144,21 @@ full_setup() {
     done
 
     if ! systemctl is-enabled libvirtd &> /dev/null; then
-        echof "Setting up libvirt..."; sleep 1
+        echof "Setting up libvirt..."
         sudo systemctl enable libvirtd.service
-        echof "Adding $USER to the libvirt group..."; sleep 1
+        echof "Adding $USER to the libvirt group..."
         sudo usermod -aG libvirt $USER
     fi
 
     if [[ "$(basename $SHELL)" == "zsh" ]]; then
-        echof "Setting default shell to zsh..."; sleep 1
+        echof "Setting default shell to zsh..."
         sudo chsh -s /bin/zsh $USER
     fi
 
-    echof "Creating directories..."; sleep 1
+    echof "Creating directories..."
     mkdir -p bin obsidian pictures/{wallpapers,screenshots} projects &> /dev/null
 
-    echof "Cloning dotfiles..."; sleep 1
+    echof "Cloning dotfiles..."
     cd .dotfiles
     for folder in *; do
         if [[ -e "$HOME/.config/$folder" ]]; then
@@ -140,7 +177,7 @@ case "$1" in
     "")
         install_arch
         ;;
-    initial-setup)
+    initial_setup)
         initial_setup
         ;;
     *)
