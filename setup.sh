@@ -117,10 +117,19 @@ EOF
 }
 
 full_setup() {
-    cd ~
+    cd /home/$USERNAME
+
+    echof "Setting up pacman..."
+    sed -i "s/#Color/Color/" /etc/pacman.conf
+    sed -i "s/#ParallelDownloads = 5/ParallelDownloads = 5/" /etc/pacman.conf
+    sed -i "s/#VerbosePkgLists/VerbosePkgLists/" /etc/pacman.conf
+    sed -i "s/#TotalDownload/TotalDownload/" /etc/pacman.conf
 
     echof "Updating the system..."
     pacman -Syu --noconfirm
+
+    # TODO: install video drivers + Xorg
+    # TODO: setup sudoers
 
     echof "Installing packages..."
     pacman -S --noconfirm --needed \
@@ -129,7 +138,7 @@ full_setup() {
         neovim tmux fd ripgrep exa bat ufw syncthing feh zsh starship xclip fzf xdg-user-dirs \
         playerctl \
         ttf-firacode-nerd ttf-liberation ttf-dejavu ttf-ubuntu-font-family \
-        wget zip unzip openssh \
+        wget zip unzip openssh git \
         networkmanager network-manager-applet \
         stow ranger docker bpytop \
         qemu libvirt virt-manager dnsmasq
@@ -183,7 +192,7 @@ full_setup() {
     sudo -u $USERNAME mkdir -p bin obsidian pictures/{wallpapers,screenshots} projects &> /dev/null
 
     echof "Cloning dotfiles..."
-    sudo -u $USERNAME git clone
+    sudo -u $USERNAME git clone $DOTFILES_URL .dotfiles
     cd .dotfiles
     for folder in *; do
         if [[ -e "$HOME/.config/$folder" ]]; then
@@ -193,9 +202,9 @@ full_setup() {
     done
 
     stow */
-    cd ~
+    cd -
 
-    wget -O ~/pictures/wallpapers/active.png $WALLPAPER_URL
+    wget -O /home/$USERNAME/pictures/wallpapers/active.png $WALLPAPER_URL
 }
 
 case "$1" in
