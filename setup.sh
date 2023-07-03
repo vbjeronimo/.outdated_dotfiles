@@ -9,6 +9,7 @@ USERNAME=arch
 USER_PASSWORD=password
 ROOT_PASSWORD=password
 
+DOTFILES_URL=https://github.com/vbjeronimo/.dotfiles.git
 WALLPAPER_URL=https://w.wallhaven.cc/full/9m/wallhaven-9mjoy1.png
 LIGHTDM_GREETER=lightdm-gtk-greeter
 
@@ -110,6 +111,8 @@ EOF
     useradd -m -G wheel $USERNAME
     echo "$USERNAME:$USER_PASSWORD" | chpasswd
 
+    full_setup
+
     rm /setup.sh
 }
 
@@ -117,10 +120,10 @@ full_setup() {
     cd ~
 
     echof "Updating the system..."
-    sudo pacman -Syu --noconfirm
+    pacman -Syu --noconfirm
 
     echof "Installing packages..."
-    sudo pacman -S --noconfirm --needed \
+    pacman -S --noconfirm --needed \
         lightdm $LIGHTDM_GREETER qtile dunst dmenu \
         kitty firefox thunderbird discord obsidian libreoffice-fresh \
         neovim tmux fd ripgrep exa bat ufw syncthing feh zsh starship xclip fzf xdg-user-dirs \
@@ -131,55 +134,56 @@ full_setup() {
         stow ranger docker bpytop \
         qemu libvirt virt-manager dnsmasq
 
-    sudo sed -i "s/#greeter-session=example-gtk-gnome/greeter-session=$LIGHTDM_GREETER/" /etc/lightdm/lightdm.conf
+    sed -i "s/#greeter-session=example-gtk-gnome/greeter-session=$LIGHTDM_GREETER/" /etc/lightdm/lightdm.conf
 
     if ! systemctl is-enabled docker &> /dev/null; then
         echof "Setting up docker..."
-        sudo systemctl enable docker.service
-        sudo systemctl enable containerd.service
-        sudo usermod -aG docker $USER
+        systemctl enable docker.service
+        systemctl enable containerd.service
+        usermod -aG docker $USER
     fi
 
     if ! systemctl is-enabled ufw &> /dev/null; then
         echof "Setting up firewall..."
-        sudo systemctl enable ufw.service
-        sudo ufw default deny incoming
-        sudo ufw default allow outgoing
-        sudo ufw allow ssh
-        sudo ufw enable
+        systemctl enable ufw.service
+        ufw default deny incoming
+        ufw default allow outgoing
+        ufw allow ssh
+        ufw enable
     fi
 
     echof "Enabling services..."
     ROOT_SERVICES=("lightdm" "NetworkManager")
     for service in ${ROOT_SERVICES[@]}; do
         if ! systemctl is-enabled $service &> /dev/null; then
-            sudo systemctl enable ${service}.service
+            systemctl enable ${service}.service
         fi
     done
 
     USER_SERVICES=("syncthing")
     for service in ${USER_SERVICES[@]}; do
         if ! systemctl is-enabled $service &> /dev/null; then
-            systemctl --user enable ${service}.service
+            sudo -u $USERNAME systemctl --user enable ${service}.service
         fi
     done
 
     if ! systemctl is-enabled libvirtd &> /dev/null; then
         echof "Setting up libvirt..."
-        sudo systemctl enable libvirtd.service
+        systemctl enable libvirtd.service
         echof "Adding $USER to the libvirt group..."
-        sudo usermod -aG libvirt $USER
+        usermod -aG libvirt $USER
     fi
 
-    if [[ "$(basename $SHELL)" == "zsh" ]]; then
+    if [[ "$(basename $SHELL)" != "zsh" ]]; then
         echof "Setting default shell to zsh..."
-        sudo chsh -s /bin/zsh $USER
+        chsh -s /bin/zsh $USER
     fi
 
     echof "Creating directories..."
-    mkdir -p bin obsidian pictures/{wallpapers,screenshots} projects &> /dev/null
+    sudo -u $USERNAME mkdir -p bin obsidian pictures/{wallpapers,screenshots} projects &> /dev/null
 
     echof "Cloning dotfiles..."
+    sudo -u $USERNAME git clone
     cd .dotfiles
     for folder in *; do
         if [[ -e "$HOME/.config/$folder" ]]; then
