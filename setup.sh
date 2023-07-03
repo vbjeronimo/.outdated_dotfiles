@@ -31,7 +31,7 @@ install_arch() {
     mkfs.ext4 ${DRIVE}p4
 
     mount ${DRIVE}p2 /mnt
-    mount --mkdir ${DRIVE}p1 /mnt/efi
+    mount --mkdir ${DRIVE}p1 /mnt/boot
     mount --mkdir ${DRIVE}p4 /mnt/home
     swapon ${DRIVE}p3
 
@@ -74,26 +74,41 @@ initial_setup() {
     echof "Setting root password..."
     echo "root:$ROOT_PASSWORD" | chpasswd
 
-    echof "Creating user..."
-    useradd -m -G wheel $USERNAME
-    echo "$USERNAME:$USER_PASSWORD" | chpasswd
+    echof "Installing microcode..."
+    if [[ $(lscpu | grep -o GenuineIntel) == "GenuineIntel" ]]; then
+        MICROCODE=intel-ucode
+    elif [[ $(lscpu | grep -o AuthenticAMD) == "AuthenticAMD" ]]; then
+        MICROCODE=amd-ucode
+    fi
+    pacman -S --noconfirm $MICROCODE
 
     echof "Setting up bootloader..."
     bootctl install
-    cat <<EOF > /efi/loader/entries/arch.conf
+    cat <<EOF > /boot/loader/entries/arch.conf
 title Arch linux
 linux /vmlinuz-linux
+initrd /${MICROCODE}.img
 initrd /initramfs-linux.img
 options root=${DRIVE}p2 rw
 EOF
 
-    echof "Installing microcode..."
-    if [[ $(lscpu | grep -o GenuineIntel) == "GenuineIntel" ]]; then
-        pacman -S --noconfirm intel-ucode
-    elif [[ $(lscpu | grep -o AuthenticAMD) == "AuthenticAMD" ]]; then
-        pacman -S --noconfirm amd-ucode
-    fi
+    cat <<EOF > /boot/loader/entries/arch-fallback.conf
+title Arch linux (fallback)
+linux /vmlinuz-linux
+initrd /${MICROCODE}.img
+initrd /initramfs-linux-fallback.img
+options root=${DRIVE}p2 rw
+EOF
 
+    cat <<EOF > /boot/loader/loader.conf
+default arch
+timeout 0
+editor 0
+EOF
+
+    echof "Creating user..."
+    useradd -m -G wheel $USERNAME
+    echo "$USERNAME:$USER_PASSWORD" | chpasswd
 
     rm /setup.sh
 }
