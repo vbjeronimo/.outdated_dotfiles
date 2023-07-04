@@ -52,9 +52,9 @@ install_arch() {
         echof "ERROR: Something went wrong in arch-chroot. Exiting..."
         exit 1
     else
-#        echof "Unmounting partitions..."
-#        umount -R /mnt
-#        swapoff -a
+        echof "Unmounting partitions..."
+        umount -R /mnt
+        swapoff -a
         echof "Done! You can now reboot into your new system."
     fi
 }
@@ -111,6 +111,8 @@ EOF
     useradd -m -G wheel $USERNAME
     echo "$USERNAME:$USER_PASSWORD" | chpasswd
 
+    sed -i "s/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/" /etc/sudoers
+
     full_setup
 
     rm /setup.sh
@@ -128,8 +130,16 @@ full_setup() {
     echof "Updating the system..."
     pacman -Syu --noconfirm
 
-    # TODO: install video drivers + Xorg
-    # TODO: setup sudoers
+    echof "Installing video drivers..."
+    pacman -S --noconfirm --needed xorg-server xorg-xrandr
+
+    if lspci | grep -q "NVIDIA"; then
+        pacman -S --noconfirm --needed nvidia nvidia-utils nvidia-settings
+    elif lspci | grep -q "AMD"; then
+        pacman -S --noconfirm --needed xf86-video-amdgpu
+    elif lspci | grep -q "Intel"; then
+        pacman -S --noconfirm --needed xf86-video-intel
+    fi
 
     echof "Installing packages..."
     pacman -S --noconfirm --needed \
