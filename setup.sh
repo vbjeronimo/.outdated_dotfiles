@@ -148,7 +148,7 @@ full_setup() {
         neovim tmux fd ripgrep exa bat ufw syncthing feh zsh starship xclip fzf xdg-user-dirs \
         playerctl \
         ttf-firacode-nerd ttf-liberation ttf-dejavu ttf-ubuntu-font-family \
-        wget zip unzip openssh git \
+        wget zip unzip openssh git pass \
         networkmanager network-manager-applet \
         stow ranger docker bpytop \
         qemu libvirt virt-manager dnsmasq
@@ -168,7 +168,8 @@ full_setup() {
         ufw default deny incoming
         ufw default allow outgoing
         ufw allow ssh
-        ufw enable
+        # TODO: find a way to enable ufw from within a chroot
+        #ufw enable
     fi
 
     echof "Enabling services..."
