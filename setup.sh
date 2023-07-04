@@ -204,6 +204,9 @@ full_setup() {
     stow */
     cd -
 
+    echof "Disabling root login..."
+    passwd -l root
+
     wget -O /home/$USERNAME/pictures/wallpapers/active.png $WALLPAPER_URL
 }
 
