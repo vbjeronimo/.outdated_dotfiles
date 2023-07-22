@@ -36,6 +36,7 @@ setup() {
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
     sudo sed -i "s/#greeter-session=example-gtk-gnome/greeter-session=$LIGHTDM_GREETER/" /etc/lightdm/lightdm.conf
+    sudo sed -i "s/enabled=True/enabled=False/" /etc/xdg/user-dirs.conf
 
     if ! systemctl is-enabled docker &> /dev/null; then
         echo "Setting up docker..."
