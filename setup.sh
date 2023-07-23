@@ -28,7 +28,7 @@ setup() {
         neovim tmux fd ripgrep exa bat ufw syncthing feh zsh starship xclip fzf xdg-user-dirs \
         playerctl \
         ttf-firacode-nerd ttf-liberation ttf-dejavu ttf-ubuntu-font-family \
-        wget zip unzip openssh git pass \
+        wget zip unzip openssh git pass npm python-pip \
         networkmanager network-manager-applet \
         stow ranger docker bpytop \
         qemu libvirt virt-manager dnsmasq
