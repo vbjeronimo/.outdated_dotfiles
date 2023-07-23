@@ -526,10 +526,6 @@ return {
   end
 },
 
-  -- TODO: testing TODO
-  -- HACK: testing HACK
-  -- FIX: testing FIX
-
 {
   "folke/todo-comments.nvim",
   cmd = { "TodoTrouble", "TodoTelescope" },
@@ -545,5 +541,23 @@ return {
     { "<leader>sT", "<cmd>TodoTelescope keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme" },
   },
 }
+
+{
+  "jose-elias-alvarez/null-ls.nvim",
+  enabled = false,
+  event = { "BufReadPre", "BufNewFile" },
+  dependencies = { "mason.nvim" },
+  opts = function()
+    local nls = require("null-ls")
+    return {
+      sources = {
+        --nls.builtins.formatting.prettierd,
+        nls.builtins.formatting.yapf,
+        nls.builtins.diagnostics.pylint,
+        nls.builtins.diagnostics.yamllint,
+      },
+    }
+  end
+},
 
 }
