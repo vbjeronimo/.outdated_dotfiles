@@ -65,8 +65,8 @@ return {
       }
     },
     sections = {
-      lualine_a = {'buffers'},
-      lualine_b = {'branch'},
+      lualine_a = {'mode'},
+      lualine_b = {'branch', 'diff'},
       lualine_c = {'filename'},
       lualine_x = {'filetype'},
       lualine_y = {'diagnostics'},
@@ -95,13 +95,45 @@ return {
 },
 
 {
-  "neovim/nvim-lspconfig",
+  'neovim/nvim-lspconfig',
   event = "BufReadPre",
   dependencies = {
-    --"williamboman/mason.nvim",
-    --"williamboman/mason-lspconfig.nvim",
+    "williamboman/mason.nvim",
+    "williamboman/mason-lspconfig.nvim",
+    "hrsh7th/cmp-nvim-lsp",
   },
   config = function()
+    local mason = require('mason')
+    local mason_lspconfig = require('mason-lspconfig')
+
+    mason.setup({
+      ui = {
+        border = 'single',
+        icons = {
+          package_installed = '﫟',
+          package_pending = '',
+          package_uninstalled = '',
+        }
+      }
+    })
+
+    mason_lspconfig.setup({
+      'astro',
+      'bashls',
+      'cssls',
+      'html',
+      'jsonls',
+      'lua_language_server',
+      'marksman',
+      'pylint',
+      'pyright',
+      'tailwindcss',
+      'tsserver',
+      'yamlls',
+      'yapf',
+      'yamllint'
+    })
+
     vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float)
     vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
     vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
@@ -127,7 +159,323 @@ return {
         end, opts)
       end
     })
+
+    local capabilities = require('cmp_nvim_lsp').default_capabilities()
+    local lspconfig = require('lspconfig')
+
+    mason_lspconfig.setup_handlers({
+      function(server_name)
+        lspconfig[server_name].setup({
+          on_attach = on_attach,
+          capabilities = capabilities
+        })
+      end,
+      ["lua_ls"] = function()
+          lspconfig["lua_ls"].setup({
+            on_attach = on_attach,
+            capabilities = capabilities,
+            settings = {
+              Lua = {
+                runtime = { version = "LuaJIT" },
+                diagnostics = { globals = { "vim" } },
+                workspace = { library = vim.api.nvim_get_runtime_file("", true) },
+                telemetry = { enable = false }
+              }
+            }
+          })
+      end
+    })
+
+    local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+    for type, icon in pairs(signs) do
+      local hl = "DiagnosticSign" .. type
+      vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+    end
   end
+},
+
+{
+  "nvim-telescope/telescope.nvim",
+  dependencies = {
+    "nvim-lua/plenary.nvim"
+  },
+  cmd = "Telescope",
+  keys = {
+    { "<leader>/", "<cmd>Telescope live_grep<CR>" },
+    { "<leader>:", "<cmd>Telescope command_history<CR>" },
+    -- find
+    { "<leader>ff", "<cmd>Telescope find_files<CR>" },
+    { "<leader>fo", "<cmd>Telescope oldfiles<CR>" },
+    -- search
+    { "<leader>sb", "<cmd>Telescope current_buffer_fuzzy_find<CR>" },
+    { "<leader>sh", "<cmd>Telescope help_tags<CR>" },
+  },
+  opts = {
+    defaults = {
+      file_ignore_patterns = {
+          ".git/",
+          ".cache/",
+          "node_modules/",
+      },
+      dynamic_preview_title = true,
+      vimgrep_arguments = {
+        "rg",
+        "--ignore",
+        "--hidden",
+        "--color=never",
+        "--no-heading",
+        "--with-filename",
+        "--line-number",
+        "--column",
+        "--smart-case",
+        "--trim",
+      },
+      mappings = {
+        i = {
+          ["<C-h>"] = "which_key",
+          ["<C-u>"] = false
+        }
+      }
+    },
+    pickers = {
+      find_files = {
+        hidden = true,
+        find_command = { "fd", "--type", "f", "--strip-cwd-prefix" },
+      },
+      git_files = {
+        hidden = true
+      },
+      oldfiles = {
+        find_command = { "fd", "--type", "f", "--strip-cwd-prefix" },
+      }
+    },
+  }
+},
+
+{
+  "hrsh7th/nvim-cmp",
+  version = false,
+  event = "InsertEnter",
+  dependencies = {
+    "hrsh7th/cmp-nvim-lsp",
+    "hrsh7th/cmp-buffer",
+    "hrsh7th/cmp-path",
+    "hrsh7th/cmp-cmdline",
+    "saadparwaiz1/cmp_luasnip",
+    "onsails/lspkind.nvim",
+    "ray-x/lsp_signature.nvim"
+  },
+  config = function()
+    local cmp = require("cmp")
+    local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+    local lspkind = require("lspkind")
+    local lsp_signature = require("lsp_signature")
+
+    lsp_signature.setup({
+        hint_enable = false,
+        handler_opts = {
+            border = "single"
+        }
+    })
+
+    cmp.setup({
+        enabled = function()
+            -- disable completion in comments
+            local context = require "cmp.config.context"
+            -- keep command mode completion enabled when cursor is in a comment
+            if vim.api.nvim_get_mode().mode == "c" then
+                return true
+            elseif vim.bo.buftype == "prompt" then
+                return false
+            else
+                return not context.in_treesitter_capture("comment")
+                    and not context.in_syntax_group("Comment")
+            end
+        end
+        ,
+        snippet = {
+            expand = function(args)
+                require("luasnip").lsp_expand(args.body)
+            end,
+        },
+        window = {
+            completion = {
+                border = 'single',
+                winhighlight = "FloatBorder:FloatBorder,Normal:Normal",
+            },
+            documentation = {
+                border = 'single',
+                winhighlight = "FloatBorder:FloatBorder,Normal:Normal",
+            },
+        },
+        mapping = cmp.mapping.preset.insert({
+            ["<C-p>"] = cmp.mapping.select_prev_item(),
+            ["<C-n>"] = cmp.mapping.select_next_item(),
+            ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+            ["<C-f>"] = cmp.mapping.scroll_docs(4),
+            ["<C-Space>"] = cmp.mapping.complete(),
+            ["<C-e>"] = cmp.mapping.abort(),
+            ["<CR>"] = cmp.mapping.confirm({ select = true }),
+            ["<C-CR>"] = cmp.mapping.confirm({ select = false }),
+        }),
+        sources = {
+            { name = "nvim_lsp", group_index = 1 },
+            { name = "nvim_lua", group_index = 1 },
+            { name = "luasnip", group_index = 1 },
+            { name = "buffer", group_index = 2 },
+            { name = "path", group_index = 3 },
+        },
+        formatting = {
+            format = lspkind.cmp_format({
+                mode = "symbol_text",
+                maxwidth = 50,
+                ellipsis_char = "...",
+                menu = ({
+                    buffer = "[Buffer]",
+                    nvim_lsp = "[LSP]",
+                    luasnip = "[LuaSnip]",
+                    nvim_lua = "[Lua]",
+                    path = "[Path]",
+                })
+            })
+        }
+    })
+
+    cmp.setup.cmdline("/", {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = {
+            { name = "buffer" }
+        }
+    })
+
+    cmp.setup.cmdline(":", {
+      mapping = cmp.mapping.preset.cmdline(),
+      sources = cmp.config.sources({
+        { name = "path" }
+      }, {
+        {
+          name = "cmdline",
+          option = {
+            ignore_cmds = { "Man", "!" }
+          }
+        }
+      })
+    })
+
+    cmp.event:on(
+        "confirm_done",
+        cmp_autopairs.on_confirm_done()
+    )
+  end,
+},
+
+{
+  "nvim-tree/nvim-tree.lua",
+  dependencies = {
+      "nvim-tree/nvim-web-devicons"
+  },
+  opts = {
+    view = {
+      width = 30,
+      mappings = {
+        list = {
+          -- user mappings go here
+        },
+      },
+    },
+    diagnostics = {
+      enable = true,
+    },
+    update_focused_file = {
+      enable = true,
+    },
+    actions = {
+      open_file = {
+        quit_on_open = true,
+      },
+    },
+  },
+  keys = {
+    { "<leader>e", "<cmd>NvimTreeToggle<CR>" }
+  }
+},
+
+{
+  "nvim-treesitter/nvim-treesitter",
+  build = ":TSUpdate",
+  event = { "BufReadPost", "BufNewFile" },
+  keys = {
+    { "<C-space>", desc = "Increment selection" },
+    { "<BS>", desc = "Schrink selection", mode = "x" },
+  },
+  config = function ()
+    local configs = require("nvim-treesitter.configs")
+
+    configs.setup({
+      ensure_installed = {
+        "bash",
+        "comment",
+        "css",
+        "diff",
+        "dockerfile",
+        "gitignore",
+        "html",
+        "http",
+        "javascript",
+        "json",
+        "lua",
+        "markdown_inline",
+        "python",
+        "regex",
+        "tsx",
+        "typescript",
+        "yaml",
+      },
+      highlight = { enable = true },
+      indent = { enable = true },
+      context_commentstring = { enable = true, enable_autocmd = false },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = "<C-space>",
+          node_incremental = "<C-space>",
+          scope_incremental = "<nop>",
+          node_decremental = "<BS>",
+        },
+      },
+    })
+  end
+},
+
+{
+  "nvim-tree/nvim-tree.lua",
+  dependencies = {
+    "nvim-tree/nvim-web-devicons"
+  },
+  opts = {
+    view = {
+      width = 30,
+      mappings = {
+        list = {
+          -- user mappings go here
+        },
+      },
+    },
+    diagnostics = {
+      enable = true,
+    },
+    update_focused_file = {
+      enable = true,
+    },
+    actions = {
+      open_file = {
+        quit_on_open = true,
+      },
+    },
+  },
+  keys = {
+    { "<leader>e", "<cmd>NvimTreeToggle<CR>" }
+  }
 },
 
 }

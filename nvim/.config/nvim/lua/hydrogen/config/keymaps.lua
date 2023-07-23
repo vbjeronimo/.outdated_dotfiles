@@ -17,11 +17,11 @@ map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
 map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
 map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
--- open Explore
-map("n", "<leader>e", "<cmd>:25Lexplore<cr>", { desc = "Open netrw-Explore on the left" })
-
 -- Lazy
-map("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Lazy" })
+map("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Open Lazy" })
+
+-- Mason
+map("n", "<leader>m", "<cmd>:Mason<cr>", { desc = "Open Mason" })
 
 -- quit
 map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
