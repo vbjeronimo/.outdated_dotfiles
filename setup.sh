@@ -33,6 +33,7 @@ setup() {
         stow ranger docker bpytop \
         qemu libvirt virt-manager dnsmasq
 
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
     sudo sed -i "s/#greeter-session=example-gtk-gnome/greeter-session=$LIGHTDM_GREETER/" /etc/lightdm/lightdm.conf
