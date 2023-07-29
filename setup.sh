@@ -25,7 +25,7 @@ setup() {
     sudo pacman -S --noconfirm --needed \
         lightdm $LIGHTDM_GREETER qtile dunst dmenu \
         kitty firefox thunderbird discord obsidian libreoffice-fresh \
-        neovim tmux fd ripgrep exa bat ufw syncthing feh zsh starship xclip fzf xdg-user-dirs \
+        neovim tmux fd ripgrep exa bat ufw syncthing feh starship xclip fzf xdg-user-dirs \
         playerctl \
         ttf-firacode-nerd ttf-liberation ttf-dejavu ttf-ubuntu-font-family noto-fonts-emoji \
         wget zip unzip openssh git pass npm python-pip \
@@ -33,7 +33,6 @@ setup() {
         stow ranger docker bpytop autorandr \
         qemu libvirt virt-manager dnsmasq
 
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
     sudo sed -i "s/#greeter-session=example-gtk-gnome/greeter-session=$LIGHTDM_GREETER/" /etc/lightdm/lightdm.conf
@@ -77,11 +76,11 @@ setup() {
         sudo usermod -aG libvirt $USER
     fi
 
-    if [[ "$(basename $SHELL)" != "zsh" ]]; then
-        echo "Setting default shell to zsh..."
+    if [[ "$(basename $SHELL)" != "fish" ]]; then
+        echo "Setting default shell to fish..."
         # setting USERNAME here because USER is 'root' when running chsh with 'sudo'
         USERNAME=$USER
-        sudo chsh -s /bin/zsh $USERNAME
+        sudo chsh -s /bin/fish $USERNAME
     fi
 
     echo "Creating directories..."
