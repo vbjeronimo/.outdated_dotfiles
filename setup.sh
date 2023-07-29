@@ -30,7 +30,7 @@ setup() {
         ttf-firacode-nerd ttf-liberation ttf-dejavu ttf-ubuntu-font-family noto-fonts-emoji \
         wget zip unzip openssh git pass npm python-pip \
         networkmanager network-manager-applet \
-        stow ranger docker bpytop \
+        stow ranger docker bpytop autorandr \
         qemu libvirt virt-manager dnsmasq
 
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
