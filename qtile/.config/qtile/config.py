@@ -63,7 +63,7 @@ keys = [
     Key([mod], "BackSpace", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "space", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    Key([mod], "space", lazy.spawn("rofi -show drun -show-icons"), desc="Spawn a command using a prompt widget"),
 
     Key([mod, alt], "f", lazy.spawn("firefox"), desc="Open Firefox"),
     Key([mod, alt], "s", lazy.spawn("spotify"), desc="Open Spotify"),
