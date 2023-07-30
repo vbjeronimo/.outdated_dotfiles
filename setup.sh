@@ -6,20 +6,9 @@ DOTFILES_URL=git@github.com:vbjeronimo/.dotfiles.git
 WALLPAPER_URL=https://w.wallhaven.cc/full/9m/wallhaven-9mjoy1.png
 LIGHTDM_GREETER=lightdm-gtk-greeter
 
-setup() {
-    cd ~
-
+install_packages() {
     echo "Updating the system..."
     sudo pacman -Syu --noconfirm
-
-    echo "Installing video drivers..."
-    if lspci | grep -q "NVIDIA"; then
-        sudo pacman -S --noconfirm --needed nvidia nvidia-utils nvidia-settings
-    elif lspci | grep -q "AMD"; then
-        sudo pacman -S --noconfirm --needed xf86-video-amdgpu
-    elif lspci | grep -q "Intel"; then
-        sudo pacman -S --noconfirm --needed xf86-video-intel
-    fi
 
     echo "Installing packages..."
     sudo pacman -S --noconfirm --needed \
@@ -34,7 +23,24 @@ setup() {
         stow ranger docker bpytop autorandr \
         qemu libvirt virt-manager dnsmasq
 
-    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    if lspci | grep -q "NVIDIA"; then
+        sudo pacman -S --noconfirm --needed nvidia nvidia-utils nvidia-settings
+    elif lspci | grep -q "AMD"; then
+        sudo pacman -S --noconfirm --needed xf86-video-amdgpu
+    elif lspci | grep -q "Intel"; then
+        sudo pacman -S --noconfirm --needed xf86-video-intel
+    fi
+
+    if [[ ! -e ~/.tmux/plugins/tpm ]]; then
+        echo "Cloning Tmux Package Manager..."
+        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    fi
+}
+
+setup() {
+    cd ~
+
+    install_packages
 
     sudo sed -i "s/#greeter-session=example-gtk-gnome/greeter-session=$LIGHTDM_GREETER/" /etc/lightdm/lightdm.conf
     sudo sed -i "s/enabled=True/enabled=False/" /etc/xdg/user-dirs.conf
@@ -109,6 +115,9 @@ setup() {
 case "$1" in
     "")
         setup
+        ;;
+    install_packages)
+        install_packages
         ;;
     *)
         echo "Unexpected argument: '$1'"
