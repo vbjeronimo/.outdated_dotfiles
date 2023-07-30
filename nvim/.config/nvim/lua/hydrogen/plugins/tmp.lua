@@ -118,9 +118,9 @@ return {
     })
 
     mason_lspconfig.setup({
-      'astro',
       'bashls',
       'cssls',
+      'dockerls',
       'html',
       'jsonls',
       'lua_language_server',
@@ -128,10 +128,11 @@ return {
       'pylint',
       'pyright',
       'tailwindcss',
+      'taplo',
       'tsserver',
+      'yamllint',
       'yamlls',
       'yapf',
-      'yamllint'
     })
 
     vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float)
