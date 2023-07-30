@@ -12,8 +12,8 @@ return {
     signs = {
       add = { text = "▎" },
       change = { text = "▎" },
-      delete = { text = "契" },
-      topdelete = { text = "契" },
+      delete = { text = "" },
+      topdelete = { text = "" },
       changedelete = { text = "▎" },
       untracked = { text = "▎" },
     },
@@ -110,8 +110,8 @@ return {
       ui = {
         border = 'single',
         icons = {
-          package_installed = '﫟',
-          package_pending = '',
+          package_installed = '⏺﫟',
+          package_pending = '󰦗',
           package_uninstalled = '',
         }
       }
@@ -187,7 +187,7 @@ return {
       end
     })
 
-    local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+    local signs = { Error = "", Warn = "", Hint = "", Info = " " }
     for type, icon in pairs(signs) do
       local hl = "DiagnosticSign" .. type
       vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
@@ -565,11 +565,38 @@ return {
   "kylechui/nvim-surround",
   version = "*", -- Use for stability; omit to use `main` branch for the latest features
   event = "VeryLazy",
-  config = function()
-    require("nvim-surround").setup({
-      -- Configuration here, or leave empty to use defaults
-    })
-  end
+  config = true
+},
+
+{
+  'j-hui/fidget.nvim',
+  tag = 'legacy',
+  opts = {}
+},
+
+
+{
+  -- Add indentation guides even on blank lines
+  'lukas-reineke/indent-blankline.nvim',
+  -- Enable `lukas-reineke/indent-blankline.nvim`
+  -- See `:help indent_blankline.txt`
+  opts = {
+    char = '⏐',
+    show_trailing_blankline_indent = false,
+  },
+},
+
+{
+  'numToStr/Comment.nvim',
+  opts = {
+    toggler = {
+      line = 'gc',
+      block = 'gb'
+    },
+    mappings = {
+      extra = false
+    }
+  }
 },
 
 }
