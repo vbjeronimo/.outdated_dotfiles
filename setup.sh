@@ -18,7 +18,7 @@ install_packages() {
         playerctl \
         ttf-firacode-nerd ttf-liberation ttf-dejavu ttf-ubuntu-font-family noto-fonts-emoji \
         papirus-icon-theme \
-        wget zip unzip openssh git pass npm python-pip \
+        wget zip unzip openssh git pass npm python-pip luarocks \
         networkmanager network-manager-applet \
         stow ranger docker bpytop autorandr \
         qemu libvirt virt-manager dnsmasq
