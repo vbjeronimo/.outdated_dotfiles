@@ -17,7 +17,7 @@ map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
 map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
 map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
-map("i", "", "<Esc>ciw", { desc = "Delete word" })
+map("i", "<C-BS>", "<Esc>ciw", { desc = "Delete word" })
 
 -- Lazy
 map("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Open Lazy" })
