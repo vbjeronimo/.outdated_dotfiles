@@ -8,5 +8,6 @@ alias l="exa -l --icons --group-directories-first"
 alias ll="exa -la --icons --group-directories-first --git"
 alias t="exa -T --icons"
 alias tt="exa -Ta --icons"
+alias md="mkdir -p"
 
 starship init fish | source
