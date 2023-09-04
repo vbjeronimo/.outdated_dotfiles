@@ -26,12 +26,12 @@ sudo sed -i "s/#greeter-session=example-gtk-gnome/greeter-session=$LIGHTDM_GREET
 sudo systemctl enable lightdm.service
 
 echo "[*] Installing graphical environment..."
-sudo pacman -S --noconfirm --needed i3-gaps dunst rofi papirus-icon-theme
+sudo pacman -S --noconfirm --needed i3-gaps i3status dunst rofi papirus-icon-theme python-pywal autorandr
 
 echo "[*] Installing more stuff..."
 sudo pacman -S --noconfirm --needed \
     kitty starship fzf \
-    wget zip unzip openssh git pass stow exa bat feh xclip playerctl \
+    wget zip unzip openssh git pass stow exa bat feh xclip playerctl xorg-xev \
     ttf-firacode-nerd ttf-liberation ttf-dejavu ttf-ubuntu-font-family noto-fonts-emoji \
     firefox thunderbird discord obsidian
 
@@ -43,7 +43,7 @@ fi
 
 echo "[*] Installing NetworkManager..."
 sudo pacman -S --noconfirm --needed networkmanager network-manager-applet
-sudo sysetmctl enable NetworkManager.service
+sudo systemctl enable NetworkManager.service
 
 echo "[*] Installing Neovim..."
 sudo pacman -S --noconfirm --needed neovim fd ripgrep luarocks npm python-pip
@@ -99,4 +99,4 @@ cd -
 echo "Disabling root login..."
 sudo passwd -l root
 
-wget -O ~/pictures/wallpapers/active.png $WALLPAPER_URL
+wget $WALLPAPER_URL -O ~/pictures/wallpapers/active.png
