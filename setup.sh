@@ -78,15 +78,18 @@ sudo pacman -S --noconfirm --needed qemu libvirt virt-manager dnsmasq
 sudo systemctl enable libvirtd.service
 sudo usermod -aG libvirt $USERNAME
 
-echo "[*] Installing pyenv..."
+echo "[*] Installing python development tools..."
+echo "[*][*] Installing pyenv..."
 # Install compilation dependencies to build Python from source
 sudo pacman -S --needed base-devel openssl zlib xz tk
 curl https://pyenv.run | bash
 if [ "$(basename "$SHELL")" == "fish" ]; then
     echo "[*] Adding pyenv to fish config..."
     set -Ux PYENV_ROOT $HOME/.pyenv
-    fish_add_path $PYENV_ROOT/bin
 fi
+
+echo "[*][*] Installing poetry..."
+curl -sSL https://install.python-poetry.org | python3 -
 
 cd ~
 
