@@ -79,6 +79,8 @@ sudo systemctl enable libvirtd.service
 sudo usermod -aG libvirt $USERNAME
 
 echo "[*] Installing pyenv..."
+# Install compilation dependencies to build Python from source
+sudo pacman -S --needed base-devel openssl zlib xz tk
 curl https://pyenv.run | bash
 if [ "$(basename "$SHELL")" == "fish" ]; then
     echo "[*] Adding pyenv to fish config..."
