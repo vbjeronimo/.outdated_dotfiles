@@ -10,4 +10,5 @@ alias t="exa -T --icons"
 alias tt="exa -Ta --icons"
 alias md="mkdir -p"
 
+pyenv init - | source
 starship init fish | source
