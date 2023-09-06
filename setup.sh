@@ -78,6 +78,14 @@ sudo pacman -S --noconfirm --needed qemu libvirt virt-manager dnsmasq
 sudo systemctl enable libvirtd.service
 sudo usermod -aG libvirt $USERNAME
 
+echo "[*] Installing pyenv..."
+curl https://pyenv.run | bash
+if [ "$(basename "$SHELL")" == "fish" ]; then
+    echo "[*] Adding pyenv to fish config..."
+    set -Ux PYENV_ROOT $HOME/.pyenv
+    fish_add_path $PYENV_ROOT/bin
+fi
+
 cd ~
 
 echo "[*] Creating directories..."
