@@ -133,7 +133,8 @@ return {
       return {
         sources = {
           nls.builtins.formatting.yapf,
-          nls.builtins.diagnostics.pylint,
+          -- nls.builtins.diagnostics.pylint,
+          nls.builtins.diagnostics.ruff,
           nls.builtins.diagnostics.yamllint,
         },
       }

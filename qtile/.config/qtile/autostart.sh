@@ -1,6 +1,6 @@
 #!/bin/bash
 
-feh --bg-scale ~/pictures/wallpapers/active.png &
-nm-applet &
-
+setxkbmap --variant colemak
 autorandr --change
+nm-applet &
+feh --bg-scale ~/pictures/wallpapers/active.png &
