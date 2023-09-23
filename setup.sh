@@ -2,14 +2,16 @@
 
 set -e
 
-#DOTFILES_URL="https://github.com/vbjeronimo/.dotfiles.git"
-DOTFILES_URL="git@github.com:vbjeronimo/.dotfiles.git"
+DOTFILES_URL="https://github.com/vbjeronimo/.dotfiles.git"
 WALLPAPER_URL="https://w.wallhaven.cc/full/9m/wallhaven-9mjoy1.png"
 LIGHTDM_GREETER="lightdm-gtk-greeter"
 USERNAME="$USER"
 
 echo "[*] Updating the system..."
 sudo pacman -Syu --noconfirm
+
+echo "[*] Installing base dependencies..."
+sudo pacman -S --noconfirm --needed wget curl sed zip unzip openssh git
 
 echo "[*] Installing video drivers..."
 if lspci | grep -q "NVIDIA"; then
@@ -26,19 +28,19 @@ sudo sed -i "s/#greeter-session=example-gtk-gnome/greeter-session=$LIGHTDM_GREET
 sudo systemctl enable lightdm.service
 
 echo "[*] Installing graphical environment..."
-sudo pacman -S --noconfirm --needed i3-gaps i3status dunst rofi papirus-icon-theme python-pywal autorandr
+sudo pacman -S --noconfirm --needed i3-gaps i3status dunst rofi papirus-icon-theme autorandr
 
 echo "[*] Installing more stuff..."
 sudo pacman -S --noconfirm --needed \
     kitty starship fzf \
-    wget zip unzip openssh git pass stow exa bat feh xclip playerctl xorg-xev \
+    pass stow exa bat feh xclip playerctl xorg-xev \
     ttf-firacode-nerd ttf-liberation ttf-dejavu ttf-ubuntu-font-family noto-fonts-emoji \
     firefox thunderbird discord obsidian
 
 if [ "$(basename "$SHELL")" != "fish" ]; then
     echo "[*] Setting default shell to fish..."
     sudo pacman -S --noconfirm --needed fish
-    sudo chsh -s /bin/fish $USERNAME
+    sudo chsh -s /bin/fish "$USERNAME"
 fi
 
 echo "[*] Installing NetworkManager..."
@@ -46,7 +48,7 @@ sudo pacman -S --noconfirm --needed networkmanager network-manager-applet
 sudo systemctl enable NetworkManager.service
 
 echo "[*] Installing Neovim..."
-sudo pacman -S --noconfirm --needed neovim fd ripgrep luarocks npm python-pip
+sudo pacman -S --noconfirm --needed neovim fd ripgrep luarocks npm python-pip shellcheck
 
 echo "[*] Installing Tmux..."
 sudo pacman -S --noconfirm --needed tmux
@@ -59,7 +61,7 @@ echo "[*] Installing Docker..."
 sudo pacman -S --noconfirm --needed docker
 sudo systemctl enable docker.service
 sudo systemctl enable containerd.service
-sudo usermod -aG docker $USERNAME
+sudo usermod -aG docker "$USERNAME"
 
 echo "[*] Installing UFW..."
 sudo pacman -S --noconfirm --needed ufw
@@ -76,20 +78,17 @@ systemctl --user enable syncthing.service
 echo "[*] Installing virt-manager..."
 sudo pacman -S --noconfirm --needed qemu libvirt virt-manager dnsmasq
 sudo systemctl enable libvirtd.service
-sudo usermod -aG libvirt $USERNAME
+sudo usermod -aG libvirt "$USERNAME"
 
 echo "[*] Installing python development tools..."
 echo "[*][*] Installing pyenv..."
 # Install compilation dependencies to build Python from source
-sudo pacman -S --needed base-devel openssl zlib xz tk
+sudo pacman -S --noconfirm --needed base-devel openssl zlib xz tk
 curl https://pyenv.run | bash
 if [ "$(basename "$SHELL")" == "fish" ]; then
     echo "[*] Adding pyenv to fish config..."
-    set -Ux PYENV_ROOT $HOME/.pyenv
+    set -Ux PYENV_ROOT "$HOME"/.pyenv
 fi
-
-echo "[*][*] Installing poetry..."
-curl -sSL https://install.python-poetry.org | python3 -
 
 cd ~
 
@@ -100,13 +99,13 @@ echo "[*] Cloning dotfiles..."
 git clone $DOTFILES_URL .dotfiles
 cd .dotfiles
 for folder in *; do
-    if [[ -e "~/.config/$folder" ]]; then
+    if [[ -e "$HOME/.config/$folder" ]]; then
         echo "[*] Creating backup of $folder"
-        mv "~/.config/$folder{,_bak}"
+        mv "$HOME/.config/$folder" "$HOME/.config/${folder}_bak"
     fi
 done
 
-stow */
+stow ./*/
 cd -
 
 echo "Disabling root login..."
