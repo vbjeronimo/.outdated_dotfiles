@@ -47,6 +47,14 @@ vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Move to the window on the right
 vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Move to the window above' })
 
 
+-- AUTOCOMMANDS
+vim.api.nvim_create_autocmd('BufWritePre', {
+    pattern = '*.go',
+    callback = function()
+        vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports' } }, apply = true })
+    end
+})
+
 -- PLUGINS
 require("lazy").setup({
         {
@@ -91,6 +99,7 @@ require("lazy").setup({
                     ensure_installed = {
                         "bashls",
                         "clangd",
+                        "gopls",
                         "lua_ls",
                         "marksman",
                         "pyright",
@@ -134,12 +143,33 @@ require("lazy").setup({
 
                 local capabilities = vim.lsp.protocol.make_client_capabilities()
                 capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+
+                local lspconfig = require("lspconfig")
+                local util = require("lspconfig/util")
+
                 require("mason-lspconfig").setup_handlers({
                     function(server_name)
-                        require("lspconfig")[server_name].setup({
+                        lspconfig[server_name].setup({
                             capabilities = capabilities
                         })
                     end,
+                    ["gopls"] = function()
+                        lspconfig.gopls.setup({
+                            capabilities = capabilities,
+                            cmd = { "gopls", "serve" },
+                            filetypes = { "go", "gomod", "gowork", "gotmpl" },
+                            root_dir = util.root_pattern("go.work", "go.mod", ".git"),
+                            settings = {
+                                gopls = {
+                                    usePlaceholders = true,
+                                    staticcheck = true,
+                                    analyses = {
+                                        unusedparams = true,
+                                    },
+                                }
+                            }
+                        })
+                    end
                 })
             end
         },
@@ -171,12 +201,13 @@ require("lazy").setup({
                         -- documentation = cmp.config.window.bordered(),
                     },
                     mapping = cmp.mapping.preset.insert({
-                        ['<C-p>'] = cmp.mapping.select_prev_item(),
-                        ['<C-n>'] = cmp.mapping.select_next_item(),
-                        ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-                        ['<C-f>'] = cmp.mapping.scroll_docs(4),
-                        ['<C-Space>'] = cmp.mapping.complete(),
-                        ['<C-e>'] = cmp.mapping.abort(),
+                        ["<C-p>"] = cmp.mapping.select_prev_item(),
+                        ["<C-n>"] = cmp.mapping.select_next_item(),
+                        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+                        ["<C-f>"] = cmp.mapping.scroll_docs(4),
+                        ["<C-Space>"] = cmp.mapping.complete(),
+                        ["<C-e>"] = cmp.mapping.abort(),
+                        ["<CR>"] = cmp.mapping.confirm({ select = true }),
                     }),
                     sources = cmp.config.sources({
                         { name = "nvim_lsp", group_index = 1 },

@@ -48,7 +48,9 @@ sudo pacman -S --noconfirm --needed networkmanager network-manager-applet
 sudo systemctl enable NetworkManager.service
 
 echo "[*] Installing Neovim..."
-sudo pacman -S --noconfirm --needed neovim fd ripgrep luarocks npm python-pip shellcheck
+sudo pacman -S --noconfirm --needed \
+    neovim fd ripgrep \
+    luarocks npm python-pip shellcheck go
 
 echo "[*] Installing Tmux..."
 sudo pacman -S --noconfirm --needed tmux

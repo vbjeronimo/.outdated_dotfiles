@@ -4,6 +4,7 @@ set EDITOR "nvim"
 
 set -x STARSHIP_CONFIG ~/.config/starship/starship.toml
 
+set -U fish_user_paths $HOME/go/bin $fish_user_paths
 set -U fish_user_paths $HOME/.local/bin $fish_user_paths
 set -U fish_user_paths $PYENV_ROOT/bin $fish_user_paths
 
