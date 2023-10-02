@@ -137,8 +137,18 @@ font pango:FiraCode Nerd Font 12
 set_from_resource $fg i3wm.foreground #ffffff
 set_from_resource $bg i3wm.background #000000
 
+set_from_resource $black i3wm.color0
+set_from_resource $red i3wm.color1
+set_from_resource $green i3wm.color2
+set_from_resource $yellow i3wm.color3
+set_from_resource $blue i3wm.color4
+set_from_resource $magenta i3wm.color5
+set_from_resource $cyan i3wm.color6
+set_from_resource $white i3wm.color7
+
+
 # class                 border  backgr. text indicator child_border
-client.focused          $bg     $bg     $fg  $fg       $bg
+client.focused          $bg     $bg     $fg  $green    $bg
 client.focused_inactive $bg     $bg     $fg  $bg       $bg
 client.unfocused        $bg     $bg     $fg  $bg       $bg
 client.urgent           $bg     $bg     $fg  $bg       $bg
@@ -149,18 +159,21 @@ client.background       $bg
 # i3status
 bar {
 	status_command i3status --config ~/.config/i3/i3status.conf
+
 	font pango:FiraCode Nerd Font 12
+	padding 2px
 	workspace_min_width 30
+	separator_symbol " | "
 	
 	colors {
 		background $bg
 		statusline $fg
 		separator $fg
 
-		focused_workspace  #4c7899 #285577 #ffffff
-		active_workspace   #333333 #5f676a #ffffff
-		inactive_workspace #333333 #222222 #888888
-		urgent_workspace   #2f343a #900000 #ffffff
-		binding_mode       #2f343a #900000 #ffffff
+		focused_workspace  $cyan	$cyan	$black
+		active_workspace   $blue	$blue	$black
+		inactive_workspace $black	$black	$white
+		urgent_workspace   $red		$red	$white
+		binding_mode       $magenta	$magenta $bg
 	}
 }
