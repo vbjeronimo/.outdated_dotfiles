@@ -27,3 +27,6 @@ map("n", "<leader>m", "<cmd>:Mason<cr>", { desc = "Open Mason" })
 
 -- quit
 map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
+
+-- experimental
+map("n", "<leader>wc", "<cmd>source /home/vitor/projects/colors.lua<cr><cmd>lua print('done')<cr>", { desc = "Export colorscheme" })
