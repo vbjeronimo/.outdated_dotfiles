@@ -204,6 +204,19 @@ require("lazy").setup({
 								}
 							}
 						})
+					end,
+					["lua_ls"] = function()
+						lspconfig["lua_ls"].setup({
+							capabilities = capabilities,
+							settings = {
+								Lua = {
+									runtime = { version = "LuaJIT" },
+									diagnostics = { globals = { "vim" } },
+									workspace = { checkThirdParty = false },
+									telemetry = { enable = false },
+								},
+							},
+						})
 					end
 				})
 			end
