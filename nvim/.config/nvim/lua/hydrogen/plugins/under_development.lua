@@ -1,6 +1,7 @@
 return {
   {
     dir = "~/projects/palette.nvim",
+    enabled = false,
     event = "VeryLazy",
     config = function()
       local palette = require("palette")
