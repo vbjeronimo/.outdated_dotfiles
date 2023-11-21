@@ -1,26 +1,26 @@
 return {
   {
     dir = "~/projects/palette.nvim",
-    enabled = false,
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
+    enabled = true,
     event = "VeryLazy",
     config = function()
       local palette = require("palette")
 
       palette.setup({
+        auto_generate = true,
         output_files = {
           xresources = {
             enabled = true,
-            -- path = "/home/vitor/projects/palette.nvim/palette-tests/.Xresources",
-            path = "$HOME/.Xresources",
+            -- path = "$HOME/.Xresources",
+            path = "~/projects/palette.nvim/tests/.Xresources",
           },
           kitty = {
             enabled = true,
-            -- path = "$HOME/projects/palette.nvim/palette-tests/kitty.conf",
-            path = "$HOME/.config/kitty/colors.conf",
-          },
-          test = {
-            enabled = true,
-            path = "$HOME/projects/palette.nvim/palette-tests/this-dir-shouldnt-exist/test.conf",
+            -- path = "$HOME/.config/kitty/colors.conf",
+            path = "$HOME/projects/palette.nvim/tests/kitty.conf",
           },
         },
       })
