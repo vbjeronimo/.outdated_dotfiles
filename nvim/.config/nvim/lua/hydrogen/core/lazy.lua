@@ -1,3 +1,4 @@
+-- Keep this at the top of the config
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -11,24 +12,8 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup({
-  spec = {
-    { import = "hydrogen.plugins" },
-  },
+require("lazy").setup("hydrogen.plugins", {
   defaults = {
-    lazy = false,
-    version = false,
+    lazy = true,
   },
-  performance = {
-    rtp = {
-      disabled_plugins = {
-        "gzip",
-        "netrwPlugin",
-        "tarPlugin",
-        "tohtml",
-        "tutor",
-        "zipPlugin",
-      }
-    }
-  }
 })

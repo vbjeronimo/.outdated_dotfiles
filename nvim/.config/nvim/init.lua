@@ -1,1 +1,1 @@
-require("hydrogen.config")
+require("hydrogen.core")
